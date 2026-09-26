@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Code Wrapped
 
-## Getting Started
+Mon année de code façon Spotify Wrapped : un script scanne tous mes repos git locaux et en tire 10 cartes à partager (commits, série la plus longue, jour le plus intense, profil horaire, top repos, langages, discipline de commit). Chaque carte s'exporte en PNG 1080×1350, le format portrait que LinkedIn affiche en grand.
 
-First, run the development server:
+[Read this in English](./README.en.md)
+
+## Ce que ça mesure
+
+- Commits de l'année, jours actifs, moyenne par jour codé
+- Date du premier commit de l'année et mois record
+- Plus longue série de jours consécutifs, avec une heatmap façon GitHub
+- Jour le plus intense et jour de la semaine préféré
+- Profil horaire (oiseau de nuit, lève-tôt, guerrier du week-end, métronome) et heure de pointe
+- Repos touchés, repos créés dans l'année, top 5
+- Lignes de code ajoutées et supprimées, répartition par langage (la doc et la config sont exclues)
+- Part des commits au format Angular, types les plus fréquents, part des lignes de test
+
+## Confidentialité
+
+Le fichier `src/data/wrapped.json` ne contient que des agrégats. Les messages de commit ne sont jamais exportés. Un repo privé sur GitHub (ou sans remote GitHub) apparaît comme « Projet privé A, B, C… ». Pour afficher le nom d'un repo privé que tu acceptes de montrer : `--reveal nom1,nom2`.
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS 4
+- `html-to-image` pour l'export PNG
+- Vitest pour les tests du calcul des stats
+- Script de scan en TypeScript lancé avec `tsx`, `git` et `gh` en ligne de commande
+
+## Démarrage
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run scan          # génère src/data/wrapped.json à partir de ~/IdeaProjects
+npm run dev           # http://localhost:3525
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Options du scan :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run scan -- --root ~/IdeaProjects --year 2026 --author riadh --owner riadh-mnasri --reveal riachess
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `--root` : dossier qui contient les repos (défaut `~/IdeaProjects`)
+- `--year` : année à couvrir (défaut : l'année en cours, jusqu'à aujourd'hui)
+- `--author` : motif (insensible à la casse) qui filtre l'auteur des commits, ce qui écarte les bots
+- `--owner` : compte GitHub utilisé pour savoir quels repos sont publics (via `gh repo list`)
+- `--reveal` : repos privés dont le nom peut être affiché
 
-## Learn More
+Aucune variable d'environnement n'est nécessaire. Sans `gh` authentifié, tous les repos sont traités comme privés.
 
-To learn more about Next.js, take a look at the following resources:
+## Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm test
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Déploiement
 
-## Deploy on Vercel
+Site statique sur Vercel, déployé à chaque push sur `main`. Pour mettre à jour les chiffres : relancer `npm run scan`, committer `src/data/wrapped.json` et pousser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Feuille de route
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [x] Scan multi-repos, anonymisation des repos privés
+- [x] 10 cartes FR/EN, export PNG 1080×1350
+- [ ] Image Open Graph générée à partir de la carte récap
+- [ ] Comparaison avec l'année précédente
+
+---
+
+© 2026 Riadh MNASRI
