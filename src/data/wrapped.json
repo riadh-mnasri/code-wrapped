@@ -2,12 +2,12 @@
   "year": 2026,
   "periodEnd": "2026-09-27",
   "author": "Riadh MNASRI",
-  "totalCommits": 1673,
+  "totalCommits": 1677,
   "activeDays": 100,
   "reposTouched": 104,
-  "newRepos": 104,
-  "linesAdded": 384889,
-  "linesDeleted": 44767,
+  "newRepos": 85,
+  "linesAdded": 386411,
+  "linesDeleted": 44860,
   "longestStreak": {
     "days": 19,
     "start": "2026-07-19",
@@ -24,10 +24,10 @@
     346,
     311,
     204,
-    173
+    177
   ],
   "byHour": [
-    172,
+    176,
     47,
     2,
     4,
@@ -61,7 +61,7 @@
     129,
     567,
     521,
-    354,
+    358,
     0,
     0,
     0
@@ -336,11 +336,11 @@
     10,
     7,
     1,
-    1
+    5
   ],
-  "nightShare": 0.39748953974895396,
-  "earlyShare": 0.0328750747160789,
-  "weekendShare": 0.22534369396294082,
+  "nightShare": 0.39892665474060823,
+  "earlyShare": 0.032796660703637445,
+  "weekendShare": 0.22719141323792486,
   "persona": "night-owl",
   "topRepos": [
     {
@@ -359,52 +359,52 @@
       "isPublic": true
     },
     {
+      "name": "private",
+      "commits": 46,
+      "isPublic": false
+    },
+    {
       "name": "kotlin-counterparty-risk",
       "commits": 46,
       "isPublic": true
-    },
-    {
-      "name": "private",
-      "commits": 45,
-      "isPublic": false
     }
   ],
   "languages": [
     {
       "name": "TypeScript",
-      "lines": 265422,
-      "share": 0.6896066138549036
+      "lines": 266880,
+      "share": 0.6906635680661265
     },
     {
       "name": "Kotlin",
       "lines": 31236,
-      "share": 0.08115586571712884
+      "share": 0.08083620807896255
     },
     {
       "name": "HTML",
       "lines": 27694,
-      "share": 0.07195321248463843
+      "share": 0.07166980236069884
     },
     {
       "name": "Java",
       "lines": 25537,
-      "share": 0.06634899932188242
+      "share": 0.06608766313588381
     },
     {
       "name": "CSS",
-      "lines": 17807,
-      "share": 0.04626528687491718
+      "lines": 17871,
+      "share": 0.04624868339669419
     },
     {
       "name": "Python",
       "lines": 8502,
-      "share": 0.022089485539986853
+      "share": 0.022002479225487887
     }
   ],
   "commitTypes": [
     {
       "type": "feat",
-      "count": 618
+      "count": 621
     },
     {
       "type": "fix",
@@ -412,7 +412,7 @@
     },
     {
       "type": "docs",
-      "count": 114
+      "count": 115
     },
     {
       "type": "chore",
@@ -443,6 +443,6 @@
       "count": 2
     }
   ],
-  "conventionalShare": 0.6969515839808726,
-  "testShare": 0.10587208260043805
+  "conventionalShare": 0.6976744186046512,
+  "testShare": 0.10593901312333241
 }

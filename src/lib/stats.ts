@@ -78,6 +78,7 @@ export function commitType(subject: string): string | null {
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MIN_DAYS_FOR_NEW_REPO = 2;
 
 function dayNumber(isoDay: string): number {
   const [y, m, d] = isoDay.split("-").map(Number);
@@ -136,6 +137,7 @@ export function computeWrapped({ commits, repos, year, periodEnd, author }: Comp
   const byHour = new Array<number>(24).fill(0);
   const byMonth = new Array<number>(12).fill(0);
   const perRepo = new Map<string, number>();
+  const repoDays = new Map<string, Set<string>>();
   const perLanguage = new Map<string, number>();
   const perType = new Map<string, number>();
   let linesAdded = 0;
@@ -158,6 +160,8 @@ export function computeWrapped({ commits, repos, year, periodEnd, author }: Comp
     byHour[hour]++;
     byMonth[Number(day.slice(5, 7)) - 1]++;
     perRepo.set(c.repo, (perRepo.get(c.repo) ?? 0) + 1);
+    if (!repoDays.has(c.repo)) repoDays.set(c.repo, new Set());
+    repoDays.get(c.repo)!.add(day);
 
     if (hour >= 22 || hour < 5) night++;
     if (hour >= 5 && hour < 9) early++;
@@ -187,7 +191,12 @@ export function computeWrapped({ commits, repos, year, periodEnd, author }: Comp
   const total = inYear.length;
 
   const touchedDirs = [...perRepo.keys()];
-  const newRepos = touchedDirs.filter((dir) => repoByDir.get(dir)?.firstCommitDate?.startsWith(`${year}-`)).length;
+  // Un repo « créé cette année » doit avoir vécu : premier commit dans l'année ET activité sur au
+  // moins deux jours. Ça écarte les vieux projets republiés d'un seul commit (katas, archives).
+  const newRepos = touchedDirs.filter(
+    (dir) =>
+      repoByDir.get(dir)?.firstCommitDate?.startsWith(`${year}-`) && (repoDays.get(dir)?.size ?? 0) >= MIN_DAYS_FOR_NEW_REPO,
+  ).length;
 
   return {
     year,

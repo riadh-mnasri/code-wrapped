@@ -24,6 +24,8 @@ function commit(date: string, overrides: Partial<RawCommit> = {}): RawCommit {
 const repos: RepoInfo[] = [
   { dir: "alpha", displayName: "alpha", isPublic: true, firstCommitDate: "2026-02-01T10:00:00+01:00" },
   { dir: "beta", displayName: "Projet privé", isPublic: false, firstCommitDate: "2024-05-01T10:00:00+02:00" },
+  { dir: "kata", displayName: "kata", isPublic: true, firstCommitDate: "2026-07-27T00:14:47+02:00" },
+  { dir: "sprint", displayName: "sprint", isPublic: true, firstCommitDate: "2026-08-01T09:00:00+02:00" },
 ];
 
 describe("parseGitLog", () => {
@@ -157,6 +159,24 @@ describe("computeWrapped", () => {
     expect(w.conventionalShare).toBe(0.75);
     expect(w.testShare).toBeCloseTo(10 / 70);
     expect(w.weekendShare).toBe(0.25);
+  });
+
+  it("ne compte comme créé cette année qu'un repo qui a vécu sur plusieurs jours", () => {
+    // Given : un vieux kata republié en un seul commit, et un repo monté en une seule journée
+    const commits = [
+      commit("2026-07-27T00:14:47+02:00", { repo: "kata", subject: "Initial commit" }),
+      commit("2026-08-01T09:00:00+02:00", { repo: "sprint" }),
+      commit("2026-08-01T15:00:00+02:00", { repo: "sprint" }),
+      commit("2026-02-01T10:00:00+01:00"),
+      commit("2026-02-03T10:00:00+01:00"),
+    ];
+
+    // When
+    const w = computeWrapped({ commits, repos, year: 2026, periodEnd: "2026-08-31", author: "Riadh" });
+
+    // Then
+    expect(w.reposTouched).toBe(3);
+    expect(w.newRepos).toBe(1);
   });
 
   it("choisit un profil nocturne quand la nuit domine", () => {
