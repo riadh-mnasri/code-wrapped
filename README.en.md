@@ -1,6 +1,6 @@
 # Code Wrapped
 
-My year in code, Spotify Wrapped style: a script scans all my local git repos and turns them into 10 shareable cards (commits, longest streak, busiest day, time-of-day profile, top repos, languages, commit discipline). Each card exports as a 1080×1350 PNG, the portrait format LinkedIn shows full size.
+My year in code, Spotify Wrapped style: a script scans all my local git repos and turns them into 10 shareable cards (commits, longest streak, busiest day, time-of-day profile, top repos, languages, commit discipline). Each card exports as a 1080×1350 PNG, the portrait format LinkedIn shows full size, and one button bundles 5 cards (summary, commits, streak, profile, languages) into a PDF carousel ready to post on LinkedIn.
 
 [Lire en français](./README.md)
 
@@ -11,7 +11,7 @@ My year in code, Spotify Wrapped style: a script scans all my local git repos an
 - Longest streak of consecutive days, with a GitHub-style heatmap
 - Busiest day and favourite weekday
 - Time-of-day profile (night owl, early bird, weekend warrior, metronome) and peak hour
-- Repos touched, repos created this year, top 5
+- Repos touched, repos created this year (first commit this year and activity on at least two days, so old projects republished in one commit do not count), top 5
 - Lines of code added and deleted, language breakdown (docs and config excluded)
 - Share of Angular-style commits, most frequent types, share of test lines
 
@@ -22,7 +22,8 @@ My year in code, Spotify Wrapped style: a script scans all my local git repos an
 ## Stack
 
 - Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS 4
-- `html-to-image` for PNG export
+- `html-to-image` for PNG export, `jspdf` for the PDF carousel
+- `next/og` for the Open Graph preview image (Bricolage Grotesque and JetBrains Mono as WOFF in `assets/`, OFL licence)
 - Vitest for the stats tests
 - TypeScript scan script run with `tsx`, plus the `git` and `gh` CLIs
 
@@ -62,7 +63,8 @@ Static site on Vercel, deployed on every push to `main`. To refresh the numbers:
 
 - [x] Multi-repo scan, private repo anonymisation
 - [x] 10 cards in FR/EN, 1080×1350 PNG export
-- [ ] Open Graph image generated from the summary card
+- [x] LinkedIn PDF carousel
+- [x] Open Graph image generated from the key numbers
 - [ ] Year-over-year comparison
 
 ---

@@ -1,6 +1,6 @@
 # Code Wrapped
 
-Mon année de code façon Spotify Wrapped : un script scanne tous mes repos git locaux et en tire 10 cartes à partager (commits, série la plus longue, jour le plus intense, profil horaire, top repos, langages, discipline de commit). Chaque carte s'exporte en PNG 1080×1350, le format portrait que LinkedIn affiche en grand.
+Mon année de code façon Spotify Wrapped : un script scanne tous mes repos git locaux et en tire 10 cartes à partager (commits, série la plus longue, jour le plus intense, profil horaire, top repos, langages, discipline de commit). Chaque carte s'exporte en PNG 1080×1350, le format portrait que LinkedIn affiche en grand, et un bouton assemble 5 cartes (récap, commits, série, profil, langages) en un carrousel PDF prêt à publier sur LinkedIn.
 
 [Read this in English](./README.en.md)
 
@@ -11,7 +11,7 @@ Mon année de code façon Spotify Wrapped : un script scanne tous mes repos git 
 - Plus longue série de jours consécutifs, avec une heatmap façon GitHub
 - Jour le plus intense et jour de la semaine préféré
 - Profil horaire (oiseau de nuit, lève-tôt, guerrier du week-end, métronome) et heure de pointe
-- Repos touchés, repos créés dans l'année, top 5
+- Repos touchés, repos créés dans l'année (premier commit dans l'année et activité sur au moins deux jours, pour écarter les vieux projets republiés d'un seul commit), top 5
 - Lignes de code ajoutées et supprimées, répartition par langage (la doc et la config sont exclues)
 - Part des commits au format Angular, types les plus fréquents, part des lignes de test
 
@@ -22,7 +22,8 @@ Le fichier `src/data/wrapped.json` ne contient que des agrégats. Les messages d
 ## Stack
 
 - Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS 4
-- `html-to-image` pour l'export PNG
+- `html-to-image` pour l'export PNG, `jspdf` pour le carrousel PDF
+- `next/og` pour l'image d'aperçu Open Graph (polices Bricolage Grotesque et JetBrains Mono en WOFF dans `assets/`, licence OFL)
 - Vitest pour les tests du calcul des stats
 - Script de scan en TypeScript lancé avec `tsx`, `git` et `gh` en ligne de commande
 
@@ -62,7 +63,8 @@ Site statique sur Vercel, déployé à chaque push sur `main`. Pour mettre à jo
 
 - [x] Scan multi-repos, anonymisation des repos privés
 - [x] 10 cartes FR/EN, export PNG 1080×1350
-- [ ] Image Open Graph générée à partir de la carte récap
+- [x] Carrousel LinkedIn en PDF
+- [x] Image Open Graph générée à partir des chiffres clés
 - [ ] Comparaison avec l'année précédente
 
 ---

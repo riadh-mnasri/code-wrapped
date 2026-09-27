@@ -13,9 +13,14 @@ const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const description = "Mon année de code en 10 cartes, générée depuis mes repos git. / My year in code, in 10 cards.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://code-wrapped-rm.vercel.app"),
   title: "Code Wrapped 2026 · Riadh MNASRI",
-  description: "Mon année de code en 10 cartes, générée depuis mes repos git. / My year in code, in 10 cards.",
+  description,
+  openGraph: { title: "Code Wrapped 2026 · Riadh MNASRI", description, type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
