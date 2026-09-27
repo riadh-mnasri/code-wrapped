@@ -1,15 +1,24 @@
 // © 2026 Riadh MNASRI
 "use client";
 
-import { toPng } from "html-to-image";
+import { toJpeg, toPng } from "html-to-image";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { dictionaries, type Locale } from "@/lib/i18n";
 import type { Wrapped } from "@/lib/types";
-import { slides } from "./slides";
+import { slides, StillProvider } from "./slides";
 
 const LOCALE_KEY = "code-wrapped:locale";
 /** Largeur de l'image exportée : format portrait 4:5, celui que LinkedIn et Instagram affichent en grand. */
 const EXPORT_WIDTH = 1080;
+const EXPORT_HEIGHT = 1350;
+/** Cartes du carrousel LinkedIn, dans l'ordre de lecture : le récap sert d'accroche. */
+const CAROUSEL = ["summary", "commits", "streak", "persona", "languages"];
+/** Largeur de rendu hors écran des cartes du carrousel, capturées ensuite en x2. */
+const OFFSCREEN_WIDTH = 540;
+const CARD_CLASS =
+  "grain relative flex aspect-[4/5] w-full select-none flex-col overflow-hidden rounded-[1.6rem] p-[7cqw]";
+
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function readLocale(): Locale {
   try {
@@ -25,7 +34,9 @@ export default function Story({ data }: { data: Wrapped }) {
   const [index, setIndex] = useState(0);
   const [locale, setLocale] = useState<Locale>("fr");
   const [exporting, setExporting] = useState(false);
+  const [buildingPdf, setBuildingPdf] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const t = dictionaries[locale];
   const slide = slides[index];
 
@@ -71,7 +82,7 @@ export default function Story({ data }: { data: Wrapped }) {
     setExporting(true);
     try {
       // Les compteurs animés doivent avoir atteint leur valeur finale avant la capture.
-      await new Promise((r) => setTimeout(r, 1300));
+      await wait(1300);
       node.classList.add("exporting");
       const url = await toPng(node, { pixelRatio: EXPORT_WIDTH / node.offsetWidth, cacheBust: true });
       const a = document.createElement("a");
@@ -81,6 +92,27 @@ export default function Story({ data }: { data: Wrapped }) {
     } finally {
       node.classList.remove("exporting");
       setExporting(false);
+    }
+  };
+
+  const downloadCarousel = async () => {
+    setBuildingPdf(true);
+    try {
+      // Les cartes sont montées hors écran, sans animation, quand buildingPdf passe à vrai :
+      // on laisse un court délai au rendu (et aux polices) avant de les capturer une par une.
+      await wait(400);
+      const cards = [...(carouselRef.current?.querySelectorAll<HTMLElement>("[data-slide]") ?? [])];
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF({ unit: "px", format: [EXPORT_WIDTH, EXPORT_HEIGHT], hotfixes: ["px_scaling"] });
+      for (const [i, card] of cards.entries()) {
+        // JPEG plutôt que PNG : le PDF reste léger (le grain de fond gonfle beaucoup les PNG).
+        const image = await toJpeg(card, { pixelRatio: EXPORT_WIDTH / card.offsetWidth, quality: 0.92 });
+        if (i > 0) pdf.addPage([EXPORT_WIDTH, EXPORT_HEIGHT]);
+        pdf.addImage(image, "JPEG", 0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
+      }
+      pdf.save(`code-wrapped-${data.year}-carrousel-${locale}.pdf`);
+    } finally {
+      setBuildingPdf(false);
     }
   };
 
@@ -111,7 +143,7 @@ export default function Story({ data }: { data: Wrapped }) {
           ref={cardRef}
           key={`${slide.id}-${locale}`}
           onPointerUp={onTap}
-          className={`grain relative flex aspect-[4/5] w-full cursor-pointer select-none flex-col overflow-hidden rounded-[1.6rem] p-[7cqw] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ${slide.theme}`}
+          className={`${CARD_CLASS} cursor-pointer shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ${slide.theme}`}
         >
           {slide.render({ w: data, t, locale })}
         </div>
@@ -153,8 +185,32 @@ export default function Story({ data }: { data: Wrapped }) {
             </button>
           </div>
         </div>
+        <button
+          onClick={downloadCarousel}
+          disabled={buildingPdf}
+          className="mt-3 h-11 w-full rounded-full border border-cream/20 text-sm font-semibold transition hover:bg-cream/10 active:scale-[0.99] disabled:opacity-60"
+        >
+          {buildingPdf ? t.ui.carouselBusy : t.ui.carousel}
+        </button>
         <p className="mt-3 text-center font-mono text-xs text-cream/40">{t.ui.hint}</p>
       </div>
+
+      {buildingPdf && (
+        <div ref={carouselRef} aria-hidden className="fixed top-0 -left-[10000px]" style={{ width: OFFSCREEN_WIDTH }}>
+          <StillProvider value={true}>
+          <div className="@container flex flex-col gap-4">
+            {slides
+              .filter((s) => CAROUSEL.includes(s.id))
+              .sort((a, b) => CAROUSEL.indexOf(a.id) - CAROUSEL.indexOf(b.id))
+              .map((s) => (
+                <div key={s.id} data-slide className={`${CARD_CLASS} exporting ${s.theme}`}>
+                  {s.render({ w: data, t, locale })}
+                </div>
+              ))}
+          </div>
+          </StillProvider>
+        </div>
+      )}
 
       <footer className="relative font-mono text-xs text-cream/40">© {new Date().getFullYear()} Riadh MNASRI</footer>
     </main>

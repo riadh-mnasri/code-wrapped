@@ -1,7 +1,7 @@
 // © 2026 Riadh MNASRI
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
   formatDay,
   formatHour,
@@ -26,10 +26,19 @@ export interface SlideDef {
   render: (p: SlideProps) => ReactNode;
 }
 
+/**
+ * Vrai quand les cartes sont rendues pour un export (image ou PDF) : rien ne doit être animé,
+ * sinon la capture peut tomber au milieu d'une animation (Chrome gèle les onglets en arrière-plan).
+ */
+const StillContext = createContext(false);
+export const StillProvider = StillContext.Provider;
+
 /** Compteur animé de 0 à la valeur cible, relancé à chaque montage. */
 function CountUp({ value, locale, digits = 0 }: { value: number; locale: Locale; digits?: number }) {
+  const still = useContext(StillContext);
   const [shown, setShown] = useState(0);
   useEffect(() => {
+    if (still) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const start = performance.now();
     const duration = 1200;
@@ -41,8 +50,9 @@ function CountUp({ value, locale, digits = 0 }: { value: number; locale: Locale;
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [value]);
-  return <>{formatNumber(digits ? shown : Math.round(shown), locale, digits)}</>;
+  }, [value, still]);
+  const current = still ? value : shown;
+  return <>{formatNumber(digits ? current : Math.round(current), locale, digits)}</>;
 }
 
 function Kicker({ children }: { children: ReactNode }) {
@@ -129,7 +139,8 @@ function HourClock({ byHour, locale }: { byHour: number[]; locale: Locale }) {
   const peak = argmax(byHour);
   return (
     <svg viewBox="-100 -100 200 200" className="w-[58cqw]" aria-hidden>
-      <circle r="30" className="fill-cream/5 stroke-cream/20" strokeWidth="0.6" />
+      {/* Couleurs en attributs : l'export PNG/PDF ne reprend pas les fill/stroke posés par classes. */}
+      <circle r="30" fill="rgba(244,237,225,0.05)" stroke="rgba(244,237,225,0.2)" strokeWidth="0.6" />
       {byHour.map((v, h) => {
         const angle = (h / 24) * Math.PI * 2 - Math.PI / 2;
         const inner = 34;
@@ -145,7 +156,7 @@ function HourClock({ byHour, locale }: { byHour: number[]; locale: Locale }) {
             y2={sin * outer}
             strokeWidth="5.2"
             strokeLinecap="round"
-            className={h === peak ? "stroke-coral" : h >= 22 || h < 5 ? "stroke-mustard" : "stroke-cream/35"}
+            stroke={h === peak ? "#ff5a36" : h >= 22 || h < 5 ? "#f2c14e" : "rgba(244,237,225,0.35)"}
           />
         );
       })}
@@ -157,7 +168,8 @@ function HourClock({ byHour, locale }: { byHour: number[]; locale: Locale }) {
             x={Math.cos(angle) * 18}
             y={Math.sin(angle) * 18 + 3}
             textAnchor="middle"
-            className="fill-cream/60 font-mono"
+            fill="rgba(244,237,225,0.6)"
+            fontFamily="var(--font-jetbrains), monospace"
             fontSize="8"
           >
             {formatHour(h, locale)}
